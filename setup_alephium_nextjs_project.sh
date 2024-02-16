@@ -2,9 +2,10 @@
 
 echo "Setting up Alephium skeleton project..."
 npx @alephium/cli@latest init $1
+cd $1
+npm install @alephium/web3-react@latest
 
 echo "Installing NextJS..."
-cd $1
 npm install next@latest react@latest react-dom@latest
 
 mv package.json package-old.json
@@ -18,7 +19,14 @@ mkdir components
 
 # Create layout.tsx
 cat > app/layout.tsx << EOF
+import React from "react";
+import { Metadata } from "next";
 import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "NextJS!",
+  description: "NextJS Project!",
+};
 
 export default function RootLayout({
   children,
@@ -35,6 +43,8 @@ EOF
 
 # Create page.tsx
 cat > app/page.tsx << EOF
+import React from 'react'
+
 export default function Page() {
   return (
     <h1>Hello, Next.js!</h1>
@@ -42,13 +52,30 @@ export default function Page() {
 }
 EOF
 
+# Install NextJS Config
+cat > next.config.js << EOF
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    reactStrictMode: true,
+    webpack: (config, { isServer }) => {
+        if (!isServer) {
+            config.resolve.fallback.fs = false
+        }
+    return config
+    }
+}
+
+module.exports = nextConfig
+EOF
+
 echo "Installing Tailwind CSS..."
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 rm tailwind.config.js
+mv postcss.config.js postcss.config.ts
 
 # Create tailwind config
-cat > tailwind.config.js << EOF
+cat > tailwind.config.ts << EOF
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -72,37 +99,6 @@ cat > app/globals.css << EOF
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 EOF
 
-npm install
 npm run dev
