@@ -69,10 +69,9 @@ module.exports = nextConfig
 EOF
 
 echo "Installing Tailwind CSS..."
-npm install -D tailwindcss postcss autoprefixer
+npm install -D tailwindcss@3.3.0 postcss autoprefixer
 npx tailwindcss init -p
 rm tailwind.config.js
-mv postcss.config.js postcss.config.ts
 
 # Create tailwind config
 cat > tailwind.config.ts << EOF
